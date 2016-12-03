@@ -80,8 +80,8 @@ while True:
         for (x,y,w,h) in faces:
                 #cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
                 cv2.circle(frame,(int(x+(w/2)),int(y+(h/2))),int(h/2),(0,0,255),2)
-                cv2.line(frame,(x,int(y+(h/2))),(x+w,int(y+(h/2))),(0,0,255),2)
-                cv2.line(frame,(int(x+(w/2)),y),(int(x+(w/2)),y+h),(0,0,255),2)
+                #cv2.line(frame,(x,int(y+(h/2))),(x+w,int(y+(h/2))),(0,0,255),2)
+                #cv2.line(frame,(int(x+(w/2)),y),(int(x+(w/2)),y+h),(0,0,255),2)
                 cv2.putText(frame, "Person {:.1f}".format(counter),
                 (int(x+(w/5)),y-15), cv2.FONT_HERSHEY_SIMPLEX, .75, (0, 0, 255), 2)
                 counter = counter + 1
