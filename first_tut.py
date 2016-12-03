@@ -1,81 +1,94 @@
 # import the necessary packages
-import argparse
 import datetime
 import imutils
 import time
 import cv2
  
-# construct the argument parser and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video", help="path to the video file")
-ap.add_argument("-a", "--min-area", type=int, default=800, help="minimum area size")
-args = vars(ap.parse_args())
- 
-# if the video argument is None, then we are reading from webcam
-if args.get("video", None) is None:
-	camera = cv2.VideoCapture(0)
- 
-# otherwise, we are reading from a video file
-else:
-	camera = cv2.VideoCapture(args["video"])
- 
+# Set up Camera Read Object
+camera = cv2.VideoCapture(0)
+
 # initialize the first frame in the video stream
 firstFrame = None
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
+#body_cascade = cv2.CascadeClassifier('haarcascade_upperbody.xml')
 
 # loop over the frames of the video
 while True:
-	# grab the current frame and initialize the occupied/unoccupied
-	# text
-	(grabbed, frame) = camera.read()
-	
-	# if the frame could not be grabbed, then we have reached the end
-	# of the video
-	if not grabbed:
-		break
+        # grab the current frame and initialize the occupied/unoccupied
+        # text
+        (grabbed, frame) = camera.read()
+        
+        # if the frame could not be grabbed, then we have reached the end
+        # of the video
+        if not grabbed:
+                break
  
-	# resize the frame, convert it to grayscale, and blur it
-	frame = imutils.resize(frame, width=500)
-	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	gray = cv2.GaussianBlur(gray, (21, 21), 0)
- 
-	# if the first frame is None, initialize it
-	if firstFrame is None:
-		firstFrame = gray
-		continue
-	# compute the absolute difference between the current frame and
-	# first frame
-	frameDelta = cv2.absdiff(firstFrame, gray)
-	thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
- 
-	# dilate the thresholded image to fill in holes, then find contours
-	# on thresholded image
-	thresh = cv2.dilate(thresh, None, iterations=2)
-	im2, cnts, hierarchy = cv2.findContours(thresh.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
- 
-	# loop over the contours
-	for c in cnts:
-		# if the contour is too small, ignore it
+        # resize the frame, convert it to grayscale, and blur it
+        frame = imutils.resize(frame, width=500)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (21, 21), 0)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        #body = body_cascade.detectMultiScale(gray, 1.3, 5)
 
-		if cv2.contourArea(c) < args["min_area"]:
-			continue
+        
+        # if the first frame is None, initialize it
+        if firstFrame is None:
+                firstFrame = gray
+                continue
+        # compute the absolute difference between the current frame and
+        # first frame
+        frameDelta = cv2.absdiff(firstFrame, gray)
+        thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
  
-		# compute the bounding box for the contour, draw it on the frame,
-		# and update the text
-		(x, y, w, h) = cv2.boundingRect(c)
-		cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-	# draw the text and timestamp on the frame
-	#cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
-	#	cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-	cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-		(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+        # dilate the thresholded image to fill in holes, then find contours
+        # on thresholded image
+        thresh = cv2.dilate(thresh, None, iterations=2)
+        (im2, cnts, hierarchy) = cv2.findContours(thresh.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        #(_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)#
+        # loop over the contours
+        for (x,y,w,h) in faces:
+                #cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+                cv2.circle(frame,(int(x+(w/2)),int(y+(h/2))),int(h/2),(0,0,255),2)
+                cv2.line(frame,(x,int(y+(h/2))),(x+w,int(y+(h/2))),(0,0,255),2)
+                cv2.line(frame,(int(x+(w/2)),y),(int(x+(w/2)),y+h),(0,0,255),2)
+
+
+
+                cv2.putText(frame, "Face Detected!!!",(0,25), cv2.FONT_HERSHEY_SIMPLEX, 1.00, (0, 0, 255), 2)
+                
+                #IF we want eye feature
+                #roi_gray = gray[y:y+h, x:x+w]
+                #roi_color = frame[y:y+h, x:x+w]      
+                #eyes = eye_cascade.detectMultiScale(roi_gray)
+                #for (ex,ey,ew,eh) in eyes:
+                #        cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(255,150,0),2)
+
+        
+        for c in cnts:
+                # if the contour is too small, ignore it
+
+                if cv2.contourArea(c) < 5000:
+                        continue
  
-	# show the frame and record if the user presses a key
-	cv2.imshow("Shooting Cam", frame)
-	key = cv2.waitKey(1) & 0xFF
+                # compute the bounding box for the contour, draw it on the frame,
+                # and update the text
+                #(x, y, w, h) = cv2.boundingRect(c)
+                #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                
+        # draw the text and timestamp on the frame
+        #cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
+        #       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+                (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
  
-	# if the `q` key is pressed, break from the lop
-	if key == ord("q"):
-		break
+        # show the frame and record if the user presses a key
+        cv2.imshow("Arnold's Eye", frame)
+        key = cv2.waitKey(1) & 0xFF
+ 
+        # if the `q` key is pressed, break from the lop
+        if key == ord("q"):
+                break
  
 # cleanup the camera and close any open windows
 camera.release()
