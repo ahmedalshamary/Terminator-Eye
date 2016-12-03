@@ -39,15 +39,19 @@ while True:
         job = service.process({"image": buff})
         res = job.result
         count = 0
+        counter = 1
         for face in res['faces']:
             x, y, dx, dy = face['roi']
             age = face['age']
             gender = face['gender']
-            cv2.putText(frame, "age = {:.1f}".format(age),
-                (350,frame.shape[0] - (30 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 0, 0), 2)
+            cv2.putText(frame, "Person {:.1f}".format(counter),
+                (350,frame.shape[0] - (70 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
+            cv2.putText(frame, "age = {:.1f}".format(age - 5),
+                (350,frame.shape[0] - (40 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
             cv2.putText(frame, "gender = {}".format(gender),
-                (350,frame.shape[0] - (10 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 0, 0), 2)
-            count = count + 50
+                (350,frame.shape[0] - (10 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
+            count = count + 100
+            counter = counter + 1
             
 
  
@@ -56,8 +60,6 @@ while True:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-        #body = body_cascade.detectMultiScale(gray, 1.3, 5)
-
         
         # if the first frame is None, initialize it
         if firstFrame is None:
@@ -74,13 +76,15 @@ while True:
         (im2, cnts, hierarchy) = cv2.findContours(thresh.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         #(_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)#
         # loop over the contours
+        counter = 1
         for (x,y,w,h) in faces:
                 #cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
                 cv2.circle(frame,(int(x+(w/2)),int(y+(h/2))),int(h/2),(0,0,255),2)
                 cv2.line(frame,(x,int(y+(h/2))),(x+w,int(y+(h/2))),(0,0,255),2)
                 cv2.line(frame,(int(x+(w/2)),y),(int(x+(w/2)),y+h),(0,0,255),2)
-
-
+                cv2.putText(frame, "Person {:.1f}".format(counter),
+                (x,y), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 0, 0), 2)
+                counter = counter + 1
 
                 cv2.putText(frame, "Face Detected!!!",(0,25), cv2.FONT_HERSHEY_SIMPLEX, 1.00, (0, 0, 255), 2)
                 
