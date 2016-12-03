@@ -3,6 +3,14 @@ import datetime
 import imutils
 import time
 import cv2
+import angus
+import io
+import numpy as np
+
+conn = angus.connect()
+service = conn.services.get_service('age_and_gender_estimation', version=1)
+service.enable_session()
+
  
 # Set up Camera Read Object
 camera = cv2.VideoCapture(0)
@@ -23,6 +31,25 @@ while True:
         # of the video
         if not grabbed:
                 break
+        
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        ret, buff = cv2.imencode(".jpg", gray,  [cv2.IMWRITE_JPEG_QUALITY, 80])
+        buff = io.BytesIO(np.array(buff).tostring())
+
+        job = service.process({"image": buff})
+        res = job.result
+        count = 0
+        for face in res['faces']:
+            x, y, dx, dy = face['roi']
+            age = face['age']
+            gender = face['gender']
+            cv2.putText(frame, "age = {:.1f}".format(age),
+                (350,frame.shape[0] - (30 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 0, 0), 2)
+            cv2.putText(frame, "gender = {}".format(gender),
+                (350,frame.shape[0] - (10 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 0, 0), 2)
+            count = count + 50
+            
+
  
         # resize the frame, convert it to grayscale, and blur it
         frame = imutils.resize(frame, width=500)
@@ -65,11 +92,11 @@ while True:
                 #        cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(255,150,0),2)
 
         
-        for c in cnts:
+        #for c in cnts:
                 # if the contour is too small, ignore it
 
-                if cv2.contourArea(c) < 5000:
-                        continue
+         #       if cv2.contourArea(c) < 5000:
+          #              continue
  
                 # compute the bounding box for the contour, draw it on the frame,
                 # and update the text
@@ -81,11 +108,14 @@ while True:
         #       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
                 (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
- 
+
         # show the frame and record if the user presses a key
+
+
         cv2.imshow("Arnold's Eye", frame)
         key = cv2.waitKey(1) & 0xFF
- 
+
+        
         # if the `q` key is pressed, break from the lop
         if key == ord("q"):
                 break
