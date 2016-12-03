@@ -87,6 +87,20 @@ while True:
                 counter = counter + 1
 
                 cv2.putText(frame, "Targeting",(0,25), cv2.FONT_HERSHEY_SIMPLEX, 1.00, (0, 0, 255), 2)
+                cv2.circle(frame,(410,90),60,(196,158,41),-1)
+                cv2.line(frame,(480,55),(410,110),(255,0,0),2)
+                cv2.line(frame,(340,55),(410,110),(255,0,0),2)
+                if x<90:
+                        cv2.circle(frame,(390,70),3,(0,0,255),-1)
+                if 90<x<180:
+                        cv2.circle(frame,(400,60),3,(0,0,255),-1)
+                if 180<x<270:
+                        cv2.circle(frame,(410,50),3,(0,0,255),-1)
+                if 270<x<345:
+                        cv2.circle(frame,(420,60),3,(0,0,255),-1)
+                if x>345:
+                        cv2.circle(frame,(430,70),3,(0,0,255),-1)
+                
                 
                 #IF we want eye feature
                 #roi_gray = gray[y:y+h, x:x+w]
