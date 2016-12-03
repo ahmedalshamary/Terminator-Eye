@@ -6,12 +6,19 @@ import cv2
 import angus
 import io
 import numpy as np
+from twilio.rest import TwilioRestClient 
 
+#Set up Facial Recogntion 
 conn = angus.connect()
 service = conn.services.get_service('age_and_gender_estimation', version=1)
 service.enable_session()
 
+# Sets up Twillio Message - removed for now change as needed
+ACCOUNT_SID = "" 
+AUTH_TOKEN = "" 
  
+client = TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN) 
+
 # Set up Camera Read Object
 camera = cv2.VideoCapture(0)
 
@@ -19,8 +26,9 @@ camera = cv2.VideoCapture(0)
 firstFrame = None
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
-#body_cascade = cv2.CascadeClassifier('haarcascade_upperbody.xml')
 
+#body_cascade = cv2.CascadeClassifier('haarcascade_upperbody.xml')
+z = 1
 # loop over the frames of the video
 while True:
         # grab the current frame and initialize the occupied/unoccupied
@@ -45,13 +53,21 @@ while True:
             age = face['age']
             gender = face['gender']
             cv2.putText(frame, "Person {:.1f}".format(counter),
-                (350,frame.shape[0] - (70 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
+                (450,frame.shape[0] - (70 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
             cv2.putText(frame, "age = {:.1f}".format(age - 5),
-                (350,frame.shape[0] - (40 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
+                (450,frame.shape[0] - (40 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
             cv2.putText(frame, "gender = {}".format(gender),
-                (350,frame.shape[0] - (10 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
+                (450,frame.shape[0] - (10 + count)), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 255, 255), 2)
             count = count + 100
             counter = counter + 1
+            while(z):
+                    print("hi")
+                    client.messages.create(
+                            to="+13167372998", 
+                            from_=" +19284400060 ", 
+                            body="Person Age = {:.1f}, Person Gender = {}".format(age- 5, gender)
+                    )
+                    z = 0
             
 
  
@@ -86,7 +102,7 @@ while True:
                 (x,y), cv2.FONT_HERSHEY_SIMPLEX, .75, (255, 0, 0), 2)
                 counter = counter + 1
 
-                cv2.putText(frame, "Face Detected!!!",(0,25), cv2.FONT_HERSHEY_SIMPLEX, 1.00, (0, 0, 255), 2)
+                cv2.putText(frame, "Target Acquired: Human",(0,25), cv2.FONT_HERSHEY_SIMPLEX, 1.00, (0, 0, 0), 2)
                 
                 #IF we want eye feature
                 #roi_gray = gray[y:y+h, x:x+w]
@@ -111,7 +127,7 @@ while True:
         #cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
         #       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-                (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+                (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 0), 1)
 
         # show the frame and record if the user presses a key
 
