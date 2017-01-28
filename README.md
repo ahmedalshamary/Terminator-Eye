@@ -1,4 +1,4 @@
-# Terminators Eye
+# Terminator's Eye
 This was a project for Local Hack Day Georgetown 2016:
 
 We used Python3 and OpenCV to process a Video Stream and track faces and report back age and gender. 
@@ -16,7 +16,7 @@ There are to run this project with twillio or without.
 
 With Twilio:
 1. Create a env with virtualenv(recoommended) or not then run a
-    pip install -r requiremnts.txt
+    pip install -r requirements.txt
     
 2. Go to API Link Generate key - https://www.angus.ai/ + follow additional steps for recogintion
 
@@ -28,7 +28,7 @@ You should be good now. If you have multiple webcams connected to your computer 
 Without Twilio:
 
 1. Create a env with virtualenv(recoommended) or not then run a
-    pip install -r requiremnts.txt
+    pip install -r requirements.txt
     
 2. Go to API Link Generate key - https://www.angus.ai/ + follow additional steps for recogintion
 
